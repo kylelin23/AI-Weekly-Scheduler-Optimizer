@@ -3,6 +3,7 @@ from typing import Optional
 
 @dataclass(frozen=True)
 # Unit of time on calendar
+# Will be slots of size 10 minutes
 class TimeSlot:
     day: str
     start: int
