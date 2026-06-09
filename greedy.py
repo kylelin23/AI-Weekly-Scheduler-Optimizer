@@ -1,7 +1,6 @@
 from models import TimeSlot, FixedEvent, FlexibleTask
-from calendar import create_time_slots
-
-DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+from slots import create_time_slots
+from constraints import DAYS, is_slot_valid
 
 # Create set of blocked slots
 def get_blocked_slots(fixed_events: list[FixedEvent], all_slots: list[TimeSlot]) -> set[TimeSlot]:
@@ -42,13 +41,7 @@ def schedule_greedy(
         for slot in all_slots: # Goes through every slot in the week
             if len(assigned) == slots_needed: # We got through all the tasks
                 break
-            if slot in blocked: # slot is alr taken
-                continue
-            if slot.start < availability_start or slot.end > availability_end: # slot outside of schedule
-                continue
-            if DAYS.index(slot.day) > DAYS.index(task.deadline_day): # slot is after deadline
-                continue
-            if slot.day == task.deadline_day and slot.end > task.deadline_time: # slot is on deadline day but past deadline
+            if not is_slot_valid(slot, task, blocked, availability_start, availability_end):
                 continue
 
             assigned.append(slot)
