@@ -1,7 +1,16 @@
-from models import TimeSlot, FlexibleTask
+from models import TimeSlot, FixedEvent, FlexibleTask
 
 # Days of the week, in order. Index is used to compare which day comes first.
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+# Set of slots occupied by fixed events, which therefore cannot hold any task.
+def get_blocked_slots(fixed_events: list[FixedEvent], all_slots: list[TimeSlot]) -> set[TimeSlot]:
+    blocked = set()
+    for slot in all_slots:
+        for event in fixed_events:
+            if slot.day == event.day and slot.start >= event.start and slot.end <= event.end:
+                blocked.add(slot)
+    return blocked
 
 # Hard-constraint check for a single slot against a single task.
 # Returns True if the slot is a legal place to put part of this task.

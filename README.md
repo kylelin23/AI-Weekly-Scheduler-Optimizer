@@ -28,8 +28,9 @@ prints a text-based weekly calendar plus any tasks that could not be scheduled.
 | `slots.py` | Builds the week as discrete 10-minute time slots (8am–midnight, Mon–Sun). |
 | `constraints.py` | Shared `DAYS` list and `is_slot_valid()` hard-constraint check. |
 | `greedy.py` | Greedy baseline scheduler: fills first valid slots, ordered by priority then deadline. |
+| `backtracking.py` | Constraint-based scheduler: backtracking search with most-constrained-first ordering, best-score-first values, and branch-and-bound pruning. Maximizes the soft-constraint score. |
 | `score.py` | Soft-constraint scoring: ranks valid schedules by preference satisfaction, with a per-task breakdown. |
-| `main.py` | Entry point with a sample week of fixed events and flexible tasks. |
+| `main.py` | Entry point: runs both schedulers on a sample week and compares their scores. |
 | `docs/` | Project proposal. |
 
 ## Model
@@ -46,5 +47,5 @@ prints a text-based weekly calendar plus any tasks that could not be scheduled.
 - [x] Data model + time-slot representation
 - [x] Greedy baseline scheduler with text output
 - [x] Soft-constraint scoring function
-- [ ] Backtracking (CSP) scheduler with heuristics + forward checking
+- [x] Backtracking (CSP) scheduler with heuristics + branch-and-bound
 - [ ] Evaluation harness comparing greedy vs. CSP on easy/medium/hard weeks

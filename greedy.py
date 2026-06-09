@@ -1,15 +1,6 @@
 from models import TimeSlot, FixedEvent, FlexibleTask
 from slots import create_time_slots
-from constraints import DAYS, is_slot_valid
-
-# Create set of blocked slots
-def get_blocked_slots(fixed_events: list[FixedEvent], all_slots: list[TimeSlot]) -> set[TimeSlot]:
-    blocked = set()
-    for slot in all_slots:
-        for event in fixed_events:
-            if slot.day == event.day and slot.start >= event.start and slot.end <= event.end:
-                blocked.add(slot)
-    return blocked
+from constraints import DAYS, is_slot_valid, get_blocked_slots
 
 # Create the schedule
 # Returns a dictionary

@@ -1,5 +1,6 @@
 from models import FixedEvent, FlexibleTask
 from greedy import schedule_greedy, print_schedule
+from backtracking import schedule_backtracking
 from score import score_schedule, print_score
 
 def main():
@@ -35,11 +36,25 @@ def main():
         ),
     ]
 
-    result = schedule_greedy(fixed_events, flexible_tasks)
-    print_schedule(result)
+    print("=" * 40)
+    print("GREEDY BASELINE")
+    print("=" * 40)
+    greedy_result = schedule_greedy(fixed_events, flexible_tasks)
+    print_schedule(greedy_result)
+    greedy_scored = score_schedule(greedy_result, flexible_tasks)
+    print_score(greedy_scored)
 
-    scored = score_schedule(result, flexible_tasks)
-    print_score(scored)
+    print("\n" + "=" * 40)
+    print("BACKTRACKING (CSP) SCHEDULER")
+    print("=" * 40)
+    bt_result = schedule_backtracking(fixed_events, flexible_tasks)
+    print_schedule(bt_result)
+    bt_scored = score_schedule(bt_result, flexible_tasks)
+    print_score(bt_scored)
+
+    print("\n" + "=" * 40)
+    print("Greedy score: " + str(greedy_scored["total"]) +
+          "   CSP score: " + str(bt_scored["total"]))
 
 if __name__ == "__main__":
     main()
