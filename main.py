@@ -1,5 +1,6 @@
 from models import FixedEvent, FlexibleTask
 from greedy import schedule_greedy, print_schedule
+from score import score_schedule, print_score
 
 def main():
     fixed_events = [
@@ -23,6 +24,7 @@ def main():
             deadline_day="Sun",
             deadline_time=22*60,
             priority=1,
+            preferred_days=["Sat", "Sun"], # prefer to do chores on the weekend
         ),
         FlexibleTask(
             name="CSC 480 Project",
@@ -35,6 +37,9 @@ def main():
 
     result = schedule_greedy(fixed_events, flexible_tasks)
     print_schedule(result)
+
+    scored = score_schedule(result, flexible_tasks)
+    print_score(scored)
 
 if __name__ == "__main__":
     main()
