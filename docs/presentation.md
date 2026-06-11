@@ -85,9 +85,9 @@ discrete and finite, it's something we can actually search over.
 
 A schedule is **only valid** if every task:
 
-- ✅ does **not overlap** a fixed event or another task
-- ✅ **finishes before its deadline**
-- ✅ stays **within available hours** (8 AM – 10 PM)
+- does **not overlap** a fixed event or another flexible task
+- finishes **before its deadline**
+- stays **within available hours** (8 AM – 10 PM)
 
 Both schedulers call the **same** `is_slot_valid()` check — identical rulebook.
 
@@ -124,10 +124,9 @@ reason string, so the system can explain *why* it placed something where it did.
 
 - Sort tasks by **priority, then deadline**
 - Drop each into the **earliest open valid slots**
-- Fast, simple... but **short-sighted**
+- Very fast and simple but short sighted
 
-Never reconsiders. A high-priority task can grab slots a deadline-locked
-task needed — and that task just gets **dropped.**
+Issue: Never reconsiders, ends up having all tasks in one day when the tasks could be done in multiple days instead
 
 <!--
 Our baseline is greedy: sort by priority and deadline, then jam each task into
@@ -172,7 +171,7 @@ When a task can't be scheduled, we say **why** — in plain English:
 - **Intrinsically impossible**
   *"needs 20h in one day, but only 14h is available per day"*
 - **Crowded out**
-  *"no free 2h block remained before its Mon 10:00 deadline —
+  *"no free 2h block remained before its Mon 10 PM deadline —
   other tasks took the time first"*
 
 <!--
