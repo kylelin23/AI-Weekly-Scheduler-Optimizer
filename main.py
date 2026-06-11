@@ -1,4 +1,4 @@
-import argparse
+import argparse, re
 from models import FixedEvent, FlexibleTask
 from greedy import schedule_greedy, print_schedule
 from backtracking import schedule_backtracking
@@ -14,6 +14,15 @@ for week in [easy_week, medium_week, hard_week]:
 
 def week_resolver(s):
     return week_dict[s]
+
+def parse_days(value):
+    value = value.strip()
+
+    if value.startswith("[") and value.endswith("]"):
+        inner = value[1:-1]
+        return [day.strip() for day in inner.split(",") if day.strip()]
+
+    return value
 
 def parse_hhmm(s):
     """
@@ -41,6 +50,44 @@ def parse_fixed_event(s):
     if end <= start:
         raise argparse.ArgumentTypeError(f"End time must be after start time in {s!r}")
     return FixedEvent(name=name, day=day, start=start, end=end)
+
+def parser_flexible_event(s):
+    parts = re.split(r',(?![^\[]*\])', s)
+    parts = [p.strip() for p in parts]
+
+    if len(parts) < 5 or len(parts) > 8:
+        raise argparse.ArgumentTypeError("--flexible needs 5-8 arguments")
+
+    name = parts[0]
+    duration = int(parts[1])
+    deadline_day = parts[2]
+    deadline_time = int(parts[3])
+    priority = int(parts[4])
+
+    kwargs = {
+        "name": name,
+        "duration": duration,
+        "deadline_day": deadline_day,
+        "deadline_time": deadline_time,
+        "priority": priority,
+    }
+
+    if len(parts) >= 6:
+        value = parse_days(parts[5])
+
+        if isinstance(value, list):
+            kwargs["preferred_days"] = value
+        else:
+            kwargs["preferred_start"] = int(value)
+
+    if len(parts) >= 7:
+        kwargs["preferred_start"] = int(parts[6])
+
+    if len(parts) == 8:
+        kwargs["preferred_end"] = int(parts[7])
+
+    return FlexibleTask(**kwargs)
+    
 
 parser = argparse.ArgumentParser()
 
@@ -82,7 +129,16 @@ parser.add_argument(
     "--fixed", type=parse_fixed_event, action="append",
     default=[],
     metavar="NAME,DAY,START,END",
-    help="Add a fixed event, e.g. \"Gym,Mon,07:00,08:00\". Repeatable.")
+    help="Add a fixed event, e.g. \"Gym,Mon,07:00,08:00\". Repeatable."
+)
+    #   --fixed "Gym,Mon,07:00,10:00"
+
+parser.add_argument(
+    "--flexible", type=parser_flexible_event, action="append",
+    default=[],
+    metavar="NAME,DURATION,DEADLINE_DAY,DEADLINE_TIME,PRIORITY",
+    help="Add a flexible event"
+)
 
 parser.add_argument(
     "--weight_scheduled", type=int, default=100, help="reward per scheduled task, scaled by priority"
@@ -113,7 +169,7 @@ def main():
     
     fixed_events = args.week[0] + args.fixed
 
-    flexible_tasks = args.week[1]
+    flexible_tasks = args.week[1] + args.flexible
 
     print("=" * 40)
     print("GREEDY BASELINE")
