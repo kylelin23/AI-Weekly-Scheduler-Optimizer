@@ -59,9 +59,9 @@ def parser_flexible_event(s):
         raise argparse.ArgumentTypeError("--flexible needs 5-8 arguments")
 
     name = parts[0]
-    duration = int(parts[1])
+    duration = parse_hhmm(parts[1])
     deadline_day = parts[2]
-    deadline_time = int(parts[3])
+    deadline_time = parse_hhmm(parts[3])
     priority = int(parts[4])
 
     kwargs = {
@@ -78,17 +78,19 @@ def parser_flexible_event(s):
         if isinstance(value, list):
             kwargs["preferred_days"] = value
         else:
-            kwargs["preferred_start"] = int(value)
+            kwargs["preferred_start"] = parse_hhmm(value)
 
     if len(parts) >= 7:
-        kwargs["preferred_start"] = int(parts[6])
+        if isinstance(parts[5], list):
+            kwargs["preferred_start"] = parse_hhmm(parts[6])
+        else:
+            kwargs["preferred_end"] = parse_hhmm(parts[6])
 
     if len(parts) == 8:
-        kwargs["preferred_end"] = int(parts[7])
+        kwargs["preferred_end"] = parse_hhmm(parts[7])
 
     return FlexibleTask(**kwargs)
     
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
