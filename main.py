@@ -1,10 +1,19 @@
+import argparse
 from models import FixedEvent, FlexibleTask
 from greedy import schedule_greedy, print_schedule
 from backtracking import schedule_backtracking
 from score import score_schedule, print_score, configure_scoring
 from explain import print_unscheduled_reasons
-import argparse
 from constraints import DAYS
+from evaluation import count_violations, easy_week, medium_week, hard_week, evaluate
+
+week_dict = {}
+for week in [easy_week, medium_week, hard_week]:
+    label, fixed, tasks, full_exists = week()
+    week_dict[label] = [fixed, tasks]
+
+def week_resolver(s):
+    return week_dict[s]
 
 def parse_hhmm(s):
     """
@@ -36,17 +45,48 @@ def parse_fixed_event(s):
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
-    "--fixed", type=parse_fixed_event, action="append",
-    default=[
+    "--week", type=week_resolver, 
+    default=[[
         FixedEvent(name="Work", day="Mon", start=16*60, end=18*60), # 4-6pm
         FixedEvent(name="AI Class", day="Tue", start=15*60, end=18*60),# 3-6pm
         FixedEvent(name="AI Class", day="Thu", start=15*60, end=18*60), # 3-6pm
-    ],
+    ], [
+        FlexibleTask(
+            name="Study for AI Exam",
+            duration=180,
+            deadline_day="Thu",
+            deadline_time=20*60,
+            priority=3,
+            preferred_end=20*60
+        ),
+        FlexibleTask(
+            name="Do Laundry",
+            duration=60,
+            deadline_day="Sun",
+            deadline_time=22*60,
+            priority=1,
+            preferred_days=["Sat", "Sun"], # prefer to do chores on the weekend
+        ),
+        FlexibleTask(
+            name="CSC 480 Project",
+            duration=120,
+            deadline_day="Fri",
+            deadline_time=17*60,
+            priority=2,
+        ),
+    ]],
+    help="Choose week from created weeks"
+)
+
+parser.add_argument(
+    "--fixed", type=parse_fixed_event, action="append",
+    default=[],
     metavar="NAME,DAY,START,END",
     help="Add a fixed event, e.g. \"Gym,Mon,07:00,08:00\". Repeatable.")
 
 parser.add_argument(
-    "--weight_scheduled", type=int, default=100, help="reward per scheduled task, scaled by priority")
+    "--weight_scheduled", type=int, default=100, help="reward per scheduled task, scaled by priority"
+)
 parser.add_argument(
     "--preferred_day", type=int, default=20, help="task placed on a preferred day"
 )
@@ -71,33 +111,9 @@ args = parser.parse_args()
 def main():
     configure_scoring(args)
     
-    fixed_events = args.fixed
+    fixed_events = args.week[0] + args.fixed
 
-    flexible_tasks = [
-        FlexibleTask(
-            name="Study for AI Exam",
-            duration=180,
-            deadline_day="Thu",
-            deadline_time=20*60,
-            priority=3,
-            preferred_end=20*60
-        ),
-        FlexibleTask(
-            name="Do Laundry",
-            duration=60,
-            deadline_day="Sun",
-            deadline_time=22*60,
-            priority=1,
-            preferred_days=["Sat", "Sun"], # prefer to do chores on the weekend
-        ),
-        FlexibleTask(
-            name="CSC 480 Project",
-            duration=120,
-            deadline_day="Fri",
-            deadline_time=17*60,
-            priority=2,
-        ),
-    ]
+    flexible_tasks = args.week[1]
 
     print("=" * 40)
     print("GREEDY BASELINE")
