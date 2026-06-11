@@ -46,24 +46,39 @@ def schedule_greedy(
     return {"schedule": schedule, "unscheduled": unscheduled}
 
 # Formatting the schedule and printing it
-def print_schedule(result: dict):
+def format_time(minutes: int) -> str:
+    return str(minutes // 60) + ":" + str(minutes % 60).zfill(2)
+
+def print_schedule(result: dict, fixed_events: list[FixedEvent] = None):
+    if fixed_events is None:
+        fixed_events = []
+
     for day in DAYS:
         print("\n" + day + ":")
 
+        # Print fixed events first
+        for event in fixed_events:
+            if event.day == day:
+                print(
+                    "  " + event.name + " (fixed): "
+                    + format_time(event.start)
+                    + " - "
+                    + format_time(event.end)
+                )
+
+        # Print scheduled flexible tasks
         for task_name, slots in result["schedule"].items():
-            day_slots = []
-            for s in slots:
-                if s.day == day:
-                    day_slots.append(s)
+            day_slots = [s for s in slots if s.day == day]
 
             if day_slots:
                 start = min(s.start for s in day_slots)
                 end = max(s.end for s in day_slots)
-                start_hour = str(start // 60)
-                start_min = str(start % 60).zfill(2) # use zfill for formatting
-                end_hour = str(end // 60)
-                end_min = str(end % 60).zfill(2)
-                print("  " + task_name + ": " + start_hour + ":" + start_min + " - " + end_hour + ":" + end_min)
+                print(
+                    "  " + task_name + ": "
+                    + format_time(start)
+                    + " - "
+                    + format_time(end)
+                )
 
     if result["unscheduled"]:
         print("\nUnscheduled: " + ", ".join(result["unscheduled"]))

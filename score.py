@@ -1,6 +1,14 @@
 from models import TimeSlot, FlexibleTask
 from constraints import DAYS
 
+WEIGHT_SCHEDULED = 100
+WEIGHT_PREFERRED_DAY = 20
+WEIGHT_PREFERRED_TIME = 20
+WEIGHT_PRIORITY_EARLY = 10
+PENALTY_UNSCHEDULED = 100
+PENALTY_LATE_NIGHT = 5
+LATE_NIGHT_CUTOFF = 21 * 60
+
 # Scoring weights for the SOFT constraints.
 #
 # Hard constraints (no overlap, deadlines, availability) are enforced by the
@@ -8,14 +16,23 @@ from constraints import DAYS
 # module only ranks *valid* schedules by how well they satisfy preferences,
 # so the constraint-based scheduler can search for a higher-scoring schedule
 # than the greedy baseline.
-WEIGHT_SCHEDULED = 100      # reward per scheduled task, scaled by priority
-WEIGHT_PREFERRED_DAY = 20   # task placed on a preferred day
-WEIGHT_PREFERRED_TIME = 20  # task placed inside its preferred time window
-WEIGHT_PRIORITY_EARLY = 10  # higher-priority tasks placed earlier in the week
-PENALTY_UNSCHEDULED = 100   # lost per unscheduled task, scaled by priority
-PENALTY_LATE_NIGHT = 5      # per slot scheduled after LATE_NIGHT_CUTOFF
-LATE_NIGHT_CUTOFF = 21 * 60 # 9:00 PM -- "user may prefer not to work late at night"
 
+def configure_scoring(args):
+    global WEIGHT_SCHEDULED
+    global WEIGHT_PREFERRED_DAY
+    global WEIGHT_PREFERRED_TIME
+    global WEIGHT_PRIORITY_EARLY
+    global PENALTY_UNSCHEDULED
+    global PENALTY_LATE_NIGHT
+    global LATE_NIGHT_CUTOFF
+
+    WEIGHT_SCHEDULED = args.weight_scheduled
+    WEIGHT_PREFERRED_DAY = args.preferred_day
+    WEIGHT_PREFERRED_TIME = args.preferred_time
+    WEIGHT_PRIORITY_EARLY = args.priority_early
+    PENALTY_UNSCHEDULED = args.unscheduled
+    PENALTY_LATE_NIGHT = args.late_night
+    LATE_NIGHT_CUTOFF = args.late_night_cutoff
 
 # Score a single scheduled task against its preferences.
 # Returns (points, reasons) where reasons explains each contribution.
