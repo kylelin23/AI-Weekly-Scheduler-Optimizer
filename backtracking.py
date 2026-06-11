@@ -1,7 +1,8 @@
 from models import TimeSlot, FixedEvent, FlexibleTask
 from slots import create_time_slots
 from constraints import DAYS, is_slot_valid, get_blocked_slots
-from score import score_task, PENALTY_UNSCHEDULED
+import score
+from score import score_task
 
 # Backtracking / constraint-satisfaction scheduler.
 #
@@ -77,7 +78,10 @@ def schedule_backtracking(
     # Best score each remaining task could contribute on its own (ignoring
     # conflicts) -- scheduling its top block, or skipping if it has no block.
     # Used to build an optimistic upper bound for branch-and-bound pruning.
-    skip_score = {t.name: -PENALTY_UNSCHEDULED * t.priority for t in flexible_tasks}
+    # Read score.PENALTY_UNSCHEDULED via the module so CLI weight overrides
+    # (configure_scoring) are picked up -- a bare import would bind the value
+    # at import time and miss later changes.
+    skip_score = {t.name: -score.PENALTY_UNSCHEDULED * t.priority for t in flexible_tasks}
     best_possible = {}
     for t in flexible_tasks:
         placements = domains[t.name]
