@@ -30,7 +30,7 @@ the two approaches we built, and the evidence that the AI approach actually wins
   (study, chores, projects)
 - Flexible tasks have a **duration, deadline, priority,** and **preferences**
 - Planning by hand is hard: many tasks, competing deadlines, limited time
-- A normal calendar app *stores* events — it doesn't *decide where things go*
+- A normal calendar app _stores_ events — it doesn't _decide where things go_
 
 <!--
 Everyone has fixed stuff that can't move, and flexible stuff that has to happen
@@ -50,8 +50,7 @@ We model the week as a **constraint-satisfaction problem (CSP):**
 - We **search** for an assignment that satisfies hard constraints...
 - ...and **optimizes** soft preferences
 
-> The system searches over many possible assignments, detects conflicts,
-> backtracks, and compares schedules with a scoring function.
+> The system searches over many possible assignments, detects conflicts, backtracks, and compares schedules with a scoring function.
 
 <!--
 This maps directly onto search and CSP from class. Time becomes a grid of slots,
@@ -68,8 +67,7 @@ than others, so we score them. That's the whole framing.
 - **Fixed events** permanently block their slots
 - **Flexible tasks** must claim enough free slots to cover their duration
 
-**Why 10 minutes?** Fine enough to be realistic, coarse enough to keep the
-search space small → *"plan my week"* becomes a **finite search problem.**
+**Why 10 minutes?** Fine enough to be realistic, coarse enough to keep the search space small → _"plan my week"_ becomes a **finite search problem.**
 
 <!--
 We chop the week into ten-minute slots. Why ten? It's the sweet spot — granular
@@ -100,16 +98,16 @@ our schedulers obey exactly the same rules. That makes the comparison fair.
 
 ---
 
-## What Makes a Schedule *Good*: Soft Constraints
+## What Makes a Schedule _Good_: Soft Constraints
 
 We **score** valid schedules on preferences (points are tunable):
 
-| Reward | pts | Penalty | pts |
-|--------|----:|---------|----:|
-| Scheduled (× priority) | +100 | Left unscheduled | −100 |
-| On a preferred day | +20 | Late-night slot | −5 |
-| In a preferred time window | +20 | | |
-| High priority placed early | +10 | | |
+| Reward                     |  pts | Penalty          |  pts |
+| -------------------------- | ---: | ---------------- | ---: |
+| Scheduled (× priority)     | +100 | Left unscheduled | −100 |
+| On a preferred day         |  +20 | Late-night slot  |   −5 |
+| In a preferred time window |  +20 |                  |      |
+| High priority placed early |  +10 |                  |      |
 
 <!--
 Beyond just "is it legal," we ask "is it good." The scoring function rewards
@@ -169,10 +167,10 @@ can't, and among all valid options it returns the best-scoring one.
 When a task can't be scheduled, we say **why** — in plain English:
 
 - **Intrinsically impossible**
-  *"needs 20h in one day, but only 14h is available per day"*
+  _"needs 20h in one day, but only 14h is available per day"_
 - **Crowded out**
-  *"no free 2h block remained before its Mon 10 PM deadline —
-  other tasks took the time first"*
+  _"no free 2h block remained before its Mon 10 PM deadline —
+  other tasks took the time first"_
 
 <!--
 A good planner shouldn't just fail silently. When a task can't fit, we diagnose
@@ -186,10 +184,9 @@ tasks took the time first. That second case is exactly greedy's failure mode.
 ## Evaluation: How We Tested
 
 - **Three weeks** of increasing difficulty: easy, medium, **hard**
-- The **hard** week is engineered so a full valid schedule *exists*,
+- The **hard** week is engineered so a full valid schedule _exists_,
   but greedy boxes itself in
-- An **independent validator** re-audits every output for rule violations
-  — we don't just trust the schedulers
+- An **independent validator** re-audits every output for rule violations — we don't just trust the schedulers
 
 <!--
 To prove the point, we run both schedulers on three weeks from easy to hard. The
@@ -227,10 +224,10 @@ then come back to the summary table.)
 
 ## Results
 
-| Week | Greedy | CSP | Outcome |
-|------|--------|-----|---------|
-| Easy | 2/2 · 330 | 2/2 · **342** | CSP wins on preferences |
-| Medium | 3/3 · 680 | 3/3 · **692** | CSP wins on preferences |
+| Week     | Greedy        | CSP               | Outcome                               |
+| -------- | ------------- | ----------------- | ------------------------------------- |
+| Easy     | 2/2 · 330     | 2/2 · **342**     | CSP wins on preferences               |
+| Medium   | 3/3 · 680     | 3/3 · **692**     | CSP wins on preferences               |
 | **Hard** | **2/3** · 450 | **3/3** · **660** | **Greedy fails; CSP fits all (+210)** |
 
 - **0** hard-constraint violations anywhere
@@ -250,8 +247,8 @@ milliseconds. That's the proposal's claim, demonstrated.
 
 - "Tight Errand" can **only** go Mon 8–10 (deadline Mon 10 AM)
 - Greedy schedules higher-priority tasks first → grabs Mon 8–10
-- → "Tight Errand" has **nowhere to go** 
-- CSP recognizes the conflict, moves the big tasks, **reserves Mon 8–10** 
+- → "Tight Errand" has **nowhere to go**
+- CSP recognizes the conflict, moves the big tasks, **reserves Mon 8–10**
 
 <!--
 Let me make the hard week concrete. There's a low-priority errand that can only
@@ -265,15 +262,15 @@ for the errand. Same inputs, but backtracking finds the schedule greedy can't.
 
 ## Architecture
 
-| Module | Responsibility |
-|--------|----------------|
-| `models` · `slots` | Data types & the time grid |
-| `constraints` | Shared hard-constraint rules |
-| `greedy` | Baseline scheduler |
-| `backtracking` | CSP scheduler |
-| `score` | Soft-constraint scoring |
-| `explain` | Why a task was dropped |
-| `evaluation` | Benchmark suite + validator |
+| Module             | Responsibility               |
+| ------------------ | ---------------------------- |
+| `models` · `slots` | Data types & the time grid   |
+| `constraints`      | Shared hard-constraint rules |
+| `greedy`           | Baseline scheduler           |
+| `backtracking`     | CSP scheduler                |
+| `score`            | Soft-constraint scoring      |
+| `explain`          | Why a task was dropped       |
+| `evaluation`       | Benchmark suite + validator  |
 
 <!--
 Quick tour of the code. Clean separation: data and the grid, one shared rulebook,
@@ -289,10 +286,9 @@ schedulers play by the same rules.
 - **Contiguous block per day** — a task runs in one sitting (e.g. a 3-hour study
   block), which is more realistic than scattering 10-minute fragments
 - **Hand-tuned weights** — transparent and explainable; every point is traceable
-- **Skip option** — when not everything fits, it degrades gracefully and *reports*
-  what it dropped instead of failing
+- **Skip option** — when not everything fits, it degrades gracefully and _reports_ what it dropped instead of failing
 
-*Each is a deliberate trade-off — and a clean hook for future work.*
+_Each is a deliberate trade-off — and a clean hook for future work._
 
 <!--
 These were intentional decisions, not oversights. Keeping a task in one
@@ -312,11 +308,11 @@ natural next step, which leads into future work.
 **Search + CSP + heuristics** turn a messy planning chore into a
 **solvable, optimizable** problem.
 
-We didn't just *claim* the AI approach is better — we **measured it:**
+We didn't just _claim_ the AI approach is better — we **measured it:**
 
--  Schedules **more tasks** (3/3 vs 2/3 on the hard week)
--  Respects **more preferences** (higher score every week)
--  **Zero** rule violations, verified independently
+- Schedules **more tasks** (3/3 vs 2/3 on the hard week)
+- Respects **more preferences** (higher score every week)
+- **Zero** rule violations, verified independently
 
 ### Thank you.
 
