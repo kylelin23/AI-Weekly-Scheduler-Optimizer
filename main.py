@@ -2,6 +2,7 @@ from models import FixedEvent, FlexibleTask
 from greedy import schedule_greedy, print_schedule
 from backtracking import schedule_backtracking
 from score import score_schedule, print_score, configure_scoring
+from explain import print_unscheduled_reasons
 import argparse
 from constraints import DAYS
 
@@ -105,6 +106,7 @@ def main():
     print_schedule(greedy_result, fixed_events)
     greedy_scored = score_schedule(greedy_result, flexible_tasks)
     print_score(greedy_scored)
+    print_unscheduled_reasons(greedy_result, flexible_tasks, fixed_events)
 
     print("\n" + "=" * 40)
     print("BACKTRACKING (CSP) SCHEDULER")
@@ -113,6 +115,7 @@ def main():
     print_schedule(bt_result, fixed_events)
     bt_scored = score_schedule(bt_result, flexible_tasks)
     print_score(bt_scored)
+    print_unscheduled_reasons(bt_result, flexible_tasks, fixed_events)
 
     print("\n" + "=" * 40)
     print("Greedy score: " + str(greedy_scored["total"]) +

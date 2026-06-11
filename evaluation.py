@@ -5,6 +5,7 @@ from constraints import DAYS
 from greedy import schedule_greedy
 from backtracking import schedule_backtracking
 from score import score_schedule
+from explain import diagnose_unscheduled
 
 AVAIL_START = 8 * 60   # 8:00 AM
 AVAIL_END = 22 * 60    # 10:00 PM
@@ -158,10 +159,12 @@ def main():
         print(_row("Greedy", g))
         print(_row("CSP", b))
 
-        if g["unscheduled"]:
-            print("  Greedy left unscheduled: " + ", ".join(g["unscheduled"]))
-        if b["unscheduled"]:
-            print("  CSP left unscheduled:    " + ", ".join(b["unscheduled"]))
+        for name in g["unscheduled"]:
+            task = next(t for t in tasks if t.name == name)
+            print("  Greedy dropped " + name + ": " + diagnose_unscheduled(task, fixed))
+        for name in b["unscheduled"]:
+            task = next(t for t in tasks if t.name == name)
+            print("  CSP dropped " + name + ": " + diagnose_unscheduled(task, fixed))
 
         # Headline takeaways.
         if b["scheduled"] > g["scheduled"]:
